@@ -1,0 +1,11 @@
+# Ignore local IDE settings
+.vscode/
+.idea/
+
+# Ignore Python artifacts
+__pycache__/
+*.pyc
+
+# Ignore compiled binaries/libraries if you do local testing
+*.so
+*.o
