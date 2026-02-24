@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(dynamixel_workbench_toolbox)
 
-# Make c++ 17 as the standard since both humble and jazzy ssupports
+# Make c++ 17 as the standard since both humble and jazzy supports
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
 endif()
@@ -43,9 +43,10 @@ install(TARGETS ${LIB_NAME}
 )
 
 install(DIRECTORY include/
-  DESTINATION include
+  DESTINATION include/${PROJECT_NAME}
 )
 
 ament_export_dependencies(dynamixel_sdk)
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_include_directories(include)
 ament_package()
