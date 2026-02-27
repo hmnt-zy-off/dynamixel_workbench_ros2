@@ -11,3 +11,8 @@ Changelog for package dynamixel_workbench_toolbox
 * Fixed the typos in the dynamixel_driver.cpp file log statement.
 * Build
 
+0.2.0 (2026-02-27)
+------------------
+* Fixed memory access bug in readRegister and syncWrite.
+* Replaced incorrect vector object addresses with .data() pointers for DXL SDK compatibility.
+
