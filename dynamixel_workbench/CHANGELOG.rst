@@ -13,3 +13,9 @@ Changelog for package dynamixel_workbench
 ------------------
 * Initial ROS 2 port release for the complete Workbench Controllers.
 * Fixed memory access bug in readRegister and syncWrite (toolbox).
+
+0.3.0 (2026-02-28)
+------------------
+* Added dynamixel_workbench_operators package.
+
+

@@ -16,3 +16,9 @@ Changelog for package dynamixel_workbench_toolbox
 * Fixed memory access bug in readRegister and syncWrite.
 * Replaced incorrect vector object addresses with .data() pointers for DXL SDK compatibility.
 
+0.3.0 (2026-02-28)
+------------------
+* Added dynamixel_workbench_operators package.
+* Version bump to align with full ROS 2 stack release
+
+
