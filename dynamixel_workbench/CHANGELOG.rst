@@ -18,4 +18,6 @@ Changelog for package dynamixel_workbench
 ------------------
 * Added dynamixel_workbench_operators package.
 
-
+0.4.0 (2026-03-06)
+------------------
+* Integrated the controller node with Lifecycle management and Multithreaded executor.

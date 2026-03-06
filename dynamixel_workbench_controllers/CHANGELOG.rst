@@ -16,3 +16,9 @@ Changelog for package dynamixel_workbench_controllers
 ------------------
 * Added dynamixel_workbench_operators package.
 * Version bump to align with full ROS 2 stack release.
+
+0.4.0 (2026-03-06)
+------------------
+* Lifecycle node support for the controller
+* Switched to Multithreaded executor
+* Added callback groups for better concurrency.
