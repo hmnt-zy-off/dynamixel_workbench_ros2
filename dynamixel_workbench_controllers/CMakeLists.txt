@@ -10,6 +10,7 @@ set(LIB_NAME "dynamixel_workbench_controllers")
 find_package(ament_cmake REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(trajectory_msgs REQUIRED)
@@ -70,7 +71,9 @@ install(DIRECTORY config/
 )
 
 ament_export_dependencies(
-  rclcppsensor_msgs
+  rclcpp
+  rclcpp_lifecycle
+  sensor_msgs
   geometry_msgs
   trajectory_msgs
   dynamixel_workbench_msgs

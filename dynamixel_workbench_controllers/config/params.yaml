@@ -1,0 +1,11 @@
+dynamixel_workbench_controllers:
+  ros__parameters:
+    port_name: "/dev/ttyUSB0"
+    baud_rate: 1000000
+    use_joint_states_topic: true
+    use_cmd_vel_topic: false
+    dxl_read_period: 0.010
+    dxl_write_period: 0.010
+    publish_period: 0.010
+    dynamixel_info: "/home/arz-1013/work/test_ws/src/dynamixel_workbench_controllers/config/test-one.yaml"
+    auto_start: true
