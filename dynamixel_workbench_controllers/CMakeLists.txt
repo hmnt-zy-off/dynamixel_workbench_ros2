@@ -40,6 +40,7 @@ ament_target_dependencies(find_dynamixel
 )
 ament_target_dependencies(dynamixel_workbench_controllers
   rclcpp
+  rclcpp_lifecycle
   sensor_msgs
   geometry_msgs
   trajectory_msgs

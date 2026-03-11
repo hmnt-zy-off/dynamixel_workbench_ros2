@@ -30,9 +30,9 @@ DynamixelController::DynamixelController()
   wheel_radius_(0.0f),
   is_moving_(false)
 {
-  RCLCPP_INFO(this->get_logger(), "Unconfigured");
+  RCLCPP_WARN(this->get_logger(), "Unconfigured Controller");
 
-  this->declare_parameter<bool>("auto_start", false);
+  this->declare_parameter<bool>("autostart", false);
   this->declare_parameter("use_joint_states_topic", true);
   this->declare_parameter("use_cmd_vel_topic", false);
   this->declare_parameter("use_moveit", false);
@@ -42,23 +42,6 @@ DynamixelController::DynamixelController()
   this->declare_parameter<std::string>("port_name", "/dev/ttyUSB0");
   this->declare_parameter<int>("baud_rate", 57600);
   this->declare_parameter<std::string>("dynamixel_info", "");
-
-  is_joint_state_topic_ = this->get_parameter("use_joint_states_topic").as_bool();
-  is_cmd_vel_topic_     = this->get_parameter("use_cmd_vel_topic").as_bool();
-  use_moveit_           = this->get_parameter("use_moveit").as_bool();
-  read_period_          = this->get_parameter("dxl_read_period").as_double();
-  write_period_         = this->get_parameter("dxl_write_period").as_double();
-  pub_period_           = this->get_parameter("publish_period").as_double();
-
-  if (is_cmd_vel_topic_)
-  {
-    this->declare_parameter("mobile_robot_config.seperation_between_wheels", 0.0);
-    this->declare_parameter("mobile_robot_config.radius_of_wheel", 0.0);
-    wheel_separation_ = this->get_parameter("mobile_robot_config.seperation_between_wheels").as_double();
-    wheel_radius_     = this->get_parameter("mobile_robot_config.radius_of_wheel").as_double();
-  }
-
-
 
   // in constructor or on_configure
 read_cb_group_  = this->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive);
@@ -80,46 +63,67 @@ LCL_RET DynamixelController::on_configure(const rclcpp_lifecycle::State &)
 {
   RCLCPP_DEBUG(this->get_logger(), "Configuring...");
 
+  is_joint_state_topic_ = this->get_parameter("use_joint_states_topic").as_bool();
+  is_cmd_vel_topic_     = this->get_parameter("use_cmd_vel_topic").as_bool();
+  use_moveit_           = this->get_parameter("use_moveit").as_bool();
+  read_period_          = this->get_parameter("dxl_read_period").as_double();
+  write_period_         = this->get_parameter("dxl_write_period").as_double();
+  pub_period_           = this->get_parameter("publish_period").as_double();
 
-  dxl_wb_  = std::make_unique<DynamixelWorkbench>();
-  jnt_tra_ = std::make_unique<JointTrajectory>();
+  if (is_cmd_vel_topic_)
+  {
+    this->declare_parameter("mobile_robot_config.seperation_between_wheels", 0.0);
+    this->declare_parameter("mobile_robot_config.radius_of_wheel", 0.0);
+    wheel_separation_ = this->get_parameter("mobile_robot_config.seperation_between_wheels").as_double();
+    wheel_radius_     = this->get_parameter("mobile_robot_config.radius_of_wheel").as_double();
+  }
 
 
   std::string port_name = this->get_parameter("port_name").as_string();
   int         baud_rate = this->get_parameter("baud_rate").as_int();
   std::string yaml_file = this->get_parameter("dynamixel_info").as_string();
+    
+  if(yaml_file=="")
+  {
+    RCLCPP_WARN(this->get_logger(),"Provide valid YAML file");
+    return LCL_RET::FAILURE;
+  }
+
+  dxl_wb_  = std::make_unique<DynamixelWorkbench>();
+  jnt_tra_ = std::make_unique<JointTrajectory>();
 
   if (!initWorkbench(port_name, (uint32_t)baud_rate))
   {
-    RCLCPP_ERROR(this->get_logger(),"Please check USB port name");
+    RCLCPP_WARN(this->get_logger(),"Please check USB port name");
     return LCL_RET::FAILURE;
   }
+  
   if (!getDynamixelsInfo(yaml_file))
   {
-    RCLCPP_ERROR(this->get_logger(),"Please check YAML file");
     return LCL_RET::FAILURE;
-}
+  }
+
   if (!loadDynamixels())
   {
-    RCLCPP_ERROR(this->get_logger(),"Please check Dynamixel ID or BaudRate");
+    RCLCPP_WARN(this->get_logger(),"Please check Dynamixel ID or BaudRate");
     return LCL_RET::FAILURE;
 }
   
   if (!initDynamixels())
   {
-    RCLCPP_ERROR(this->get_logger(),"Please check control table (http://emanual.robotis.com/#control-table)");
+    RCLCPP_WARN(this->get_logger(),"Please check control table (http://emanual.robotis.com/#control-table)");
     return LCL_RET::FAILURE;
 }
   
   if (!initControlItems())
   {
-    RCLCPP_ERROR(this->get_logger(),"Please check control items");
+    RCLCPP_WARN(this->get_logger(),"Please check control items");
     return LCL_RET::FAILURE;
   }
     
   if (!initSDKHandlers())
   {
-    RCLCPP_ERROR(this->get_logger(),"Failed to set Dynamixel SDK Handler");
+    RCLCPP_WARN(this->get_logger(),"Failed to set Dynamixel SDK Handler");
     return LCL_RET::FAILURE;
   }
     
@@ -239,7 +243,7 @@ bool DynamixelController::initWorkbench(const std::string port_name, const uint3
 bool DynamixelController::getDynamixelsInfo(const std::string yaml_file)
 {
   RCLCPP_DEBUG(this->get_logger(), "*** getDynamixelsInfo ***");
-
+  
   YAML::Node dynamixel;
   dynamixel = YAML::LoadFile(yaml_file.c_str());
 
@@ -604,12 +608,13 @@ void DynamixelController::readCallback()
     }
   }
   // auto dt = this->get_clock()->now() - t0;
-  // if (dt.seconds() > read_period_)
+  // // if (dt.seconds() > read_period_)
   //   RCLCPP_WARN(this->get_logger(), "readCallback took %.4f s", dt.seconds());
 }
 
 void DynamixelController::publishCallback()
 {
+  // auto t0 = this->get_clock()->now();
   std::lock_guard<std::mutex> lock(dxl_mutex_);
   if (!dxl_wb_) return;
 
@@ -659,10 +664,14 @@ void DynamixelController::publishCallback()
 
     joint_states_pub_->publish(joint_state_msg_);
   }
+  // auto dt = this->get_clock()->now() - t0;
+  // // if (dt.seconds() > read_period_)
+  //   RCLCPP_WARN(this->get_logger(), "publishallback took %.4f s", dt.seconds());
 }
 
 void DynamixelController::writeCallback()
 {
+  // auto t0 = this->get_clock()->now();
   std::lock_guard<std::mutex> lock(dxl_mutex_);
   if (!dxl_wb_) return; 
 
@@ -715,6 +724,9 @@ void DynamixelController::writeCallback()
       }
     }
   }
+  // auto dt = this->get_clock()->now() - t0;
+  // // if (dt.seconds() > read_period_)
+  //   RCLCPP_WARN(this->get_logger(), "writeCallback took %.4f s", dt.seconds());
 }
 
 // ---------------------------------------------------------------------------
@@ -925,7 +937,7 @@ int main(int argc, char **argv)
   rclcpp::executors::MultiThreadedExecutor executor;
   executor.add_node(node->get_node_base_interface());
   
-  if (node->get_parameter("auto_start").as_bool())
+  if (node->get_parameter("autostart").as_bool())
   {
     node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_CONFIGURE);
     node->trigger_transition(lifecycle_msgs::msg::Transition::TRANSITION_ACTIVATE);

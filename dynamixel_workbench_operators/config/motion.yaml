@@ -1,7 +1,7 @@
 joint:
   names: [mx64]
 motion:
-  names: [right, zero, left]
+  names: [right, zero, left, zero2]
   right:
     step: [-3.13] #[-3.14, -3.14]  # radian
     time_from_start: 3.0  # sec
@@ -11,4 +11,6 @@ motion:
   left:
     step: [3.13] #[3.14, 3.14]
     time_from_start: 6.0
-
+  zero2:
+    step: [0.0] #[0.0, 0.0]
+    time_from_start: 8.0
