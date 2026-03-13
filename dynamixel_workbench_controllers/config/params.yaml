@@ -8,4 +8,4 @@ dynamixel_workbench_controllers:
     dxl_write_period: 0.010
     publish_period: 0.010
     dynamixel_info: "/home/arz-1013/work/test_ws/src/dynamixel_workbench_controllers/config/test-one.yaml"
-    auto_start: true
+    autostart: true
